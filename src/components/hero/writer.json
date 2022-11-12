@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_hero_writers",
+  "info": {
+    "displayName": "Writer",
+    "icon": "terminal"
+  },
+  "options": {},
+  "attributes": {
+    "title": {
+      "type": "string"
+    }
+  }
+}

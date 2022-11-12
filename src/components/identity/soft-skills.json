@@ -1,0 +1,14 @@
+{
+  "collectionName": "components_identity_soft_skills",
+  "info": {
+    "displayName": "Soft Skills",
+    "icon": "brain",
+    "description": ""
+  },
+  "options": {},
+  "attributes": {
+    "quality": {
+      "type": "string"
+    }
+  }
+}
