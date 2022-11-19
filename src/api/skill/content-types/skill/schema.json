@@ -68,7 +68,7 @@
         }
       },
       "type": "uid",
-      "targetField": "title"
+      "targetField": "name"
     }
   }
 }
