@@ -1,0 +1,46 @@
+{
+  "kind": "singleType",
+  "collectionName": "contacts",
+  "info": {
+    "singularName": "contact",
+    "pluralName": "contacts",
+    "displayName": "Contact",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "email": {
+      "type": "email",
+      "private": true
+    },
+    "phone": {
+      "type": "string",
+      "regex": "^(?:(?:\\+|00)33[\\s.-]{0,3}(?:\\(0\\)[\\s.-]{0,3})?|0)[1-9](?:(?:[\\s.-]?\\d{2}){4}|\\d{2}(?:[\\s.-]?\\d{3}){2})$",
+      "private": true
+    },
+    "disclaimer": {
+      "type": "text"
+    },
+    "discord": {
+      "type": "string"
+    },
+    "github": {
+      "type": "string"
+    },
+    "twitter": {
+      "type": "string"
+    },
+    "rootme": {
+      "type": "string"
+    },
+    "protectedEmail": {
+      "type": "string"
+    },
+    "protectedPhone": {
+      "type": "string"
+    }
+  }
+}
