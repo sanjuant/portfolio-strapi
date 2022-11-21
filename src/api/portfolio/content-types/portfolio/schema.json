@@ -54,11 +54,12 @@
       }
     },
     "previews": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
       "allowedTypes": [
         "images"
       ],
-      "type": "media",
-      "multiple": true,
       "pluginOptions": {
         "i18n": {
           "localized": true
@@ -82,6 +83,14 @@
       "type": "uid",
       "targetField": "title",
       "required": true
+    },
+    "date": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "type": "date"
     }
   }
 }
