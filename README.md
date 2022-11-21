@@ -36,6 +36,19 @@ yarn build
 
 Strapi gives you many possible deployment options for your project. Find the one that suits you on the [deployment section of the documentation](https://docs.strapi.io/developer-docs/latest/setup-deployment-guides/deployment.html).
 
+For deploying on Heroku with Postgres you can follow this after you are logged in Heroku :
+
+### 1. Install the Heroku Postgres addon (opens new window) for using Postgres.
+`heroku git:remote -a "your_heroku_app"`
+`heroku addons:create heroku-postgresql:hobby-dev`
+`heroku config`
+`heroku config:set MY_HEROKU_URL=$(heroku info -s | grep web_url | cut -d= -f2)`
+`heroku config:set APP_KEYS=$(cat .env | grep APP_KEYS | cut -d= -f2-)`
+`heroku config:set API_TOKEN_SALT=$(cat .env | grep API_TOKEN_SALT | cut -d= -f2)`
+`heroku config:set ADMIN_JWT_SECRET=$(cat .env | grep ADMIN_JWT_SECRET | cut -d= -f2)`
+`heroku config:set JWT_SECRET=$(cat .env | grep -w JWT_SECRET | cut -d= -f2)`
+`git push heroku HEAD:master`
+
 ## 📚 Learn more
 
 - [Resource center](https://strapi.io/resource-center) - Strapi resource center.
