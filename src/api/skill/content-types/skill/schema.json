@@ -69,6 +69,14 @@
       },
       "type": "uid",
       "targetField": "name"
+    },
+    "position": {
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "type": "integer"
     }
   }
 }
