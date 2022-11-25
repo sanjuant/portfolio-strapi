@@ -26,16 +26,17 @@ services:
       - ./public/uploads:/opt/app/public/uploads
     networks:
       - strapi
+      - web
     depends_on:
       - strapiDB
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=web"
-      - "traefik.http.routers.analytics.rule=Host(`strapi.sanjuan.pro`)"
-      - "traefik.http.routers.analytics.entrypoints=websecure"
-      - "traefik.http.routers.analytics.tls.certresolver=myresolver"
-      - "traefik.tcp.routers.analytics.tls.passthrough=true"
-      - "traefik.http.services.analytics.loadbalancer.server.port=1337"
+      - "traefik.http.routers.strapi.rule=Host(`strapi.sanjuant.fr`)"
+      - "traefik.http.routers.strapi.entrypoints=websecure"
+      - "traefik.http.routers.strapi.tls.certresolver=myresolver"
+      - "traefik.tcp.routers.strapi.tls.passthrough=true"
+      - "traefik.http.services.strapi.loadbalancer.server.port=1337"
 
   strapiDB:
     container_name: strapiDB
