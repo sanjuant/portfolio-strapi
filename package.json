@@ -1,33 +1,47 @@
 {
   "name": "strapi",
-  "private": true,
   "version": "0.1.0",
+  "private": true,
   "description": "A Strapi application",
   "scripts": {
+    "build": "strapi build",
+    "console": "strapi console",
+    "deploy": "strapi deploy",
+    "dev": "strapi develop",
     "develop": "strapi develop",
     "start": "strapi start",
-    "build": "strapi build",
-    "strapi": "strapi"
+    "strapi": "strapi",
+    "upgrade": "npx @strapi/upgrade latest",
+    "upgrade:dry": "npx @strapi/upgrade latest --dry"
   },
   "dependencies": {
-    "@ckeditor/strapi-plugin-ckeditor": "^0.0.4",
-    "@strapi/plugin-i18n": "4.5.2",
-    "@strapi/plugin-users-permissions": "4.5.2",
-    "@strapi/provider-upload-cloudinary": "4.5.2",
-    "@strapi/strapi": "4.5.2",
+    "@ckeditor/strapi-plugin-ckeditor": "^1.1.1",
+    "@strapi/plugin-cloud": "5.23.1",
+    "@strapi/plugin-users-permissions": "5.23.1",
+    "@strapi/provider-upload-cloudinary": "^5.23.1",
+    "@strapi/strapi": "5.23.1",
+    "better-sqlite3": "^12.2.0",
     "pg": "8.6.0",
     "pg-connection-string": "^2.5.0",
-    "strapi-plugin-populate-deep": "^1.1.2"
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "react-router-dom": "^6.0.0",
+    "sqlite3": "^5.1.7",
+    "strapi-v5-plugin-populate-deep": "^4.0.5",
+    "styled-components": "^6.0.0"
   },
-  "author": {
-    "name": "A Strapi developer"
-  },
-  "strapi": {
-    "uuid": "ec23c6f2-b641-4967-8466-ce7815ee9a3b"
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
   },
   "engines": {
-    "node": ">=14.19.1 <=18.x.x",
+    "node": ">=18.0.0 <=22.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "MIT"
+  "strapi": {
+    "uuid": "e0e1aeb1-a634-4f0d-a9f3-cee6ae874102",
+    "installId": "d2cfe734459f09f434a3579acc877566e9b701f172391d42594886535f287b3e"
+  }
 }

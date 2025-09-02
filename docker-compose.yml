@@ -1,64 +1,57 @@
-version: "3"
 services:
   strapi:
     container_name: strapi
-    build: .
+    build:
+      context: .
+      # dockerfile: Dockerfile   # <- si le nom est différent, dé-commente
     image: strapi:latest
     restart: unless-stopped
     env_file: .env
     environment:
-      DATABASE_CLIENT: ${DATABASE_CLIENT}
-      DATABASE_HOST: strapiDB
-      DATABASE_PORT: ${DATABASE_PORT}
-      DATABASE_NAME: ${DATABASE_NAME}
-      DATABASE_USERNAME: ${DATABASE_USERNAME}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      ADMIN_JWT_SECRET: ${ADMIN_JWT_SECRET}
-      APP_KEYS: ${APP_KEYS}
-      NODE_ENV: ${NODE_ENV}
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 1337
+      PUBLIC_URL: https://new.sanjuant.fr
+    depends_on:
+      strapiDB:
+        condition: service_healthy
+    # Pas besoin d'ouvrir un port sur l'hôte si tu passes par BunkerWeb
+    expose:
+      - "1337"
     volumes:
-      - ./config:/opt/app/config
-      - ./src:/opt/app/src
-      - ./package.json:/opt/package.json
-      - ./yarn.lock:/opt/yarn.lock
-      - ./.env:/opt/app/.env
       - ./public/uploads:/opt/app/public/uploads
     networks:
       - strapi
       - web
-    depends_on:
-      - strapiDB
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=web"
-      - "traefik.http.routers.strapi.rule=Host(`strapi.sanjuant.fr`)"
-      - "traefik.http.routers.strapi.entrypoints=websecure"
-      - "traefik.http.routers.strapi.tls.certresolver=myresolver"
-      - "traefik.tcp.routers.strapi.tls.passthrough=true"
-      - "traefik.http.services.strapi.loadbalancer.server.port=1337"
 
   strapiDB:
     container_name: strapiDB
-    platform: linux/amd64 #for platform error on Apple M1 chips
+    platform: linux/amd64 # utile sur Mac M1/M2 si erreurs d'images
+    image: postgres:16-alpine
     restart: unless-stopped
     env_file: .env
-    image: postgres:12.0-alpine
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
       POSTGRES_DB: ${DATABASE_NAME}
+      # (optionnel) TZ et encodage
+      TZ: Europe/Paris
+      POSTGRES_INITDB_ARGS: --encoding=UTF-8 --lc-collate=C --lc-ctype=C
     volumes:
-      - strapi-data:/var/lib/postgresql/data/ #using a volume
+      - strapi-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1 || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
     networks:
       - strapi
 
 volumes:
   strapi-data:
-    driver: local
 
 networks:
-  strapi:
+  strapi: {}
   web:
-    external:
-      name: web
+    external: true
+    name: web
