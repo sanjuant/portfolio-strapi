@@ -9,26 +9,32 @@ RUN apk add --no-cache \
     autoconf automake zlib-dev libpng-dev \
     vips-dev git
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Améliore la robustesse réseau des installs
 RUN npm config set fetch-retry-maxtimeout 600000 -g
 
 # Code + deps
 WORKDIR /opt/app
-COPY package.json package-lock.json ./
-RUN npm ci
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Copie du projet puis build Strapi (admin + server)
 COPY . .
-RUN npm run build
+RUN pnpm run build
 
 # On retire les devDependencies pour préparer l'image finale
-RUN npm prune --omit=dev
+RUN pnpm prune --prod
 
 
 # =========================
 # 2) RUNTIME (production)
 # =========================
 FROM node:22-alpine
+
+# Install pnpm in runtime stage
+RUN npm install -g pnpm
 
 # Dépendance runtime pour sharp (pas besoin de *-dev)
 RUN apk add --no-cache vips
@@ -49,4 +55,4 @@ RUN mkdir -p ./public/uploads \
 USER node
 
 EXPOSE 1337
-CMD ["npm", "run", "start"]
+CMD ["pnpm", "run", "start"]
