@@ -1,0 +1,25 @@
+# 💥 Évite d'envoyer 500–700 Mo au daemon
+.git
+.gitignore
+node_modules
+.pnpm-store
+.npm
+.cache
+.tmp
+build
+dist
+coverage
+*.log
+
+# Strapi / assets à volume
+public/uploads
+
+# CI / docker
+Dockerfile
+docker-compose.yml
+compose*.yml
+.dockerignore
+
+# Env
+.env
+.env.*

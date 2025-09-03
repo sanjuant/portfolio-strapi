@@ -1,58 +1,36 @@
-# =========================
-# 1) BUILD (avec dev deps)
-# =========================
-FROM node:22-alpine AS build
-
-# Outils nécessaires pour compiler les modules natifs (sharp, etc.)
-RUN apk add --no-cache \
-    python3 make g++ \
-    autoconf automake zlib-dev libpng-dev \
-    vips-dev git
-
-# Install pnpm
-RUN npm install -g pnpm
-
-# Améliore la robustesse réseau des installs
-RUN npm config set fetch-retry-maxtimeout 600000 -g
-
-# Code + deps
+# ---------- 1) DEPS DEV (pour build) ----------
+FROM node:22-alpine AS deps-dev
+RUN apk add --no-cache python3 make g++ autoconf automake zlib-dev libpng-dev vips-dev git
+RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
 WORKDIR /opt/app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Copie du projet puis build Strapi (admin + server)
+# ---------- 2) BUILD (admin + ts) ----------
+FROM deps-dev AS build
+WORKDIR /opt/app
 COPY . .
-RUN pnpm run build
+ENV NODE_ENV=development
+RUN pnpm build
 
-# On retire les devDependencies pour préparer l'image finale
-RUN pnpm prune --prod
+# ---------- 3) DEPS PROD (runtime only) ----------
+FROM node:22-alpine AS deps-prod
+RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
+WORKDIR /opt/app
+COPY package.json pnpm-lock.yaml ./
+# ⬇️ évite sqlite/better-sqlite3 si tu es en Postgres
+RUN pnpm install --prod --frozen-lockfile --no-optional
 
-
-# =========================
-# 2) RUNTIME (production)
-# =========================
-FROM node:22-alpine
-
-# Install pnpm in runtime stage
-RUN npm install -g pnpm
-
-# Dépendance runtime pour sharp (pas besoin de *-dev)
+# ---------- 4) RUNTIME (léger) ----------
+FROM node:22-alpine AS runner
 RUN apk add --no-cache vips
-
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV} \
-    HOST=0.0.0.0 \
-    PORT=1337
-
+ENV NODE_ENV=production HOST=0.0.0.0 PORT=1337
 WORKDIR /opt/app
 
-# On récupère le code *et* les node_modules déjà prunés
-COPY --from=build /opt/app ./
+# Copie ciblée + ownership direct (évite un chown -R très coûteux)
+COPY --from=deps-prod --chown=node:node /opt/app/node_modules ./node_modules
+COPY --from=build     --chown=node:node /opt/app ./
 
-# Dossier uploads + droits
-RUN mkdir -p ./public/uploads \
- && chown -R node:node /opt/app
 USER node
-
 EXPOSE 1337
-CMD ["pnpm", "run", "start"]
+CMD ["./node_modules/.bin/strapi", "start"]
