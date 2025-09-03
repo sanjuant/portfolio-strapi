@@ -9,7 +9,7 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /opt/
 # 👉 pnpm-lock.yaml (au lieu de package-lock.json)
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install -g node-gyp
+RUN npm install -g node-gyp
 # 👉 npm -> pnpm
 RUN pnpm config set fetch-retry-maxtimeout 600000 -g && pnpm install --prod --frozen-lockfile
 ENV PATH=/opt/node_modules/.bin:$PATH
