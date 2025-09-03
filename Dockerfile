@@ -1,36 +1,30 @@
-# ---------- 1) DEPS DEV (pour build) ----------
-FROM node:22-alpine AS deps-dev
-RUN apk add --no-cache python3 make g++ autoconf automake zlib-dev libpng-dev vips-dev git
-RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
-WORKDIR /opt/app
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Creating multi-stage build for production
+FROM node:22-alpine AS build
+RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev git > /dev/null 2>&1
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 
-# ---------- 2) BUILD (admin + ts) ----------
-FROM deps-dev AS build
+WORKDIR /opt/
+COPY package.json package-lock.json ./
+RUN npm install -g node-gyp
+RUN npm config set fetch-retry-maxtimeout 600000 -g && npm install --only=production
+ENV PATH=/opt/node_modules/.bin:$PATH
 WORKDIR /opt/app
 COPY . .
-ENV NODE_ENV=development
-RUN pnpm build
+RUN npm run build
 
-# ---------- 3) DEPS PROD (runtime only) ----------
-FROM node:22-alpine AS deps-prod
-RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
+# Creating final production image
+FROM node:22-alpine
+RUN apk add --no-cache vips-dev
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+WORKDIR /opt/
+COPY --from=build /opt/node_modules ./node_modules
 WORKDIR /opt/app
-COPY package.json pnpm-lock.yaml ./
-# ⬇️ évite sqlite/better-sqlite3 si tu es en Postgres
-RUN pnpm install --prod --frozen-lockfile --no-optional
+COPY --from=build /opt/app ./
+ENV PATH=/opt/node_modules/.bin:$PATH
 
-# ---------- 4) RUNTIME (léger) ----------
-FROM node:22-alpine AS runner
-RUN apk add --no-cache vips
-ENV NODE_ENV=production HOST=0.0.0.0 PORT=1337
-WORKDIR /opt/app
-
-# Copie ciblée + ownership direct (évite un chown -R très coûteux)
-COPY --from=deps-prod --chown=node:node /opt/app/node_modules ./node_modules
-COPY --from=build     --chown=node:node /opt/app ./
-
+RUN chown -R node:node /opt/app
 USER node
 EXPOSE 1337
-CMD ["./node_modules/.bin/strapi", "start"]
+CMD ["npm", "run", "start"]

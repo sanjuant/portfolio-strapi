@@ -1,7 +1,6 @@
 # 💥 Évite d'envoyer 500–700 Mo au daemon
 .git
 .gitignore
-node_modules
 .pnpm-store
 .npm
 .cache
