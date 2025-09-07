@@ -17,75 +17,75 @@
   },
   "attributes": {
     "title": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "company_name": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "company_website": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "start_date": {
+      "type": "date",
       "pluginOptions": {
         "i18n": {
           "localized": false
         }
-      },
-      "type": "date"
+      }
     },
     "end_date": {
+      "type": "date",
       "pluginOptions": {
         "i18n": {
           "localized": false
         }
       },
-      "type": "date",
       "required": false
     },
     "graduating_certification": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "slug": {
+      "type": "uid",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "type": "uid",
       "targetField": "title",
       "required": true
     },
     "description": {
+      "type": "customField",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "type": "customField",
+      "customField": "plugin::ckeditor5.CKEditor",
       "options": {
-        "preset": "rich"
-      },
-      "customField": "plugin::ckeditor.CKEditor"
+        "preset": "defaultHtml"
+      }
     }
   }
 }

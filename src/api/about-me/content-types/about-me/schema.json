@@ -17,43 +17,42 @@
   },
   "attributes": {
     "title": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "summary": {
+      "type": "string",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      },
-      "type": "string"
+      }
     },
     "recommendation": {
-      "displayName": "Recommendation",
       "type": "component",
-      "repeatable": false,
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "component": "about-me.recommendation"
+      "component": "about-me.recommendation",
+      "repeatable": false
     },
     "content": {
+      "type": "customField",
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
       },
-      "type": "customField",
+      "customField": "plugin::ckeditor5.CKEditor",
       "options": {
-        "preset": "rich"
-      },
-      "customField": "plugin::ckeditor.CKEditor"
+        "preset": "defaultHtml"
+      }
     }
   }
 }
