@@ -1,42 +1,83 @@
-# Creating multi-stage build for production
-FROM node:22-alpine AS build
-RUN apk update && apk add --no-cache build-base gcc autoconf automake zlib-dev libpng-dev vips-dev git > /dev/null 2>&1
-# 👉 pnpm
+############################
+# Base + pnpm
+############################
+FROM node:22-alpine AS base
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
 RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+# store pnpm stable pour le cache partagé entre stages
+RUN pnpm config set store-dir /pnpm/store -g
 
-WORKDIR /opt/
-# 👉 pnpm-lock.yaml (au lieu de package-lock.json)
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g node-gyp
-# 👉 npm -> pnpm
-RUN pnpm config set fetch-retry-maxtimeout 600000 -g && pnpm install --prod --frozen-lockfile
-ENV PATH=/opt/node_modules/.bin:$PATH
-
+############################
+# deps: préchauffe le store PNPM (cache)
+############################
+FROM base AS deps
 WORKDIR /opt/app
+COPY package.json pnpm-lock.yaml ./
+# (si tu as un .npmrc / pnpm-workspace.yaml, copie-les aussi ici)
+# COPY .npmrc ./
+# COPY pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+    pnpm fetch
+
+############################
+# build: installe toutes les deps + build Strapi (admin) puis PRUNE
+############################
+# ... (stages base et deps inchangés)
+
+FROM base AS build
+WORKDIR /opt/app
+
+RUN apk add --no-cache \
+  python3 make g++ pkgconfig \
+  autoconf automake libtool nasm \
+  zlib-dev libpng-dev vips-dev git
+
+COPY package.json pnpm-lock.yaml ./
+# Si tu as un .npmrc (registry privé/mirror), copie-le AVANT
+# COPY .npmrc ./
+
+# ✅ Important: préchauffer le store dans CE stage,
+# puis installer en offline en s'appuyant sur ce store
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
+  pnpm fetch && pnpm install --frozen-lockfile --offline
+
+# puis seulement le code (pour le cache)
 COPY . .
-# 👉 npm -> pnpm
+
+ARG NODE_ENV=production
+ENV NODE_ENV=$NODE_ENV
+ENV STRAPI_TELEMETRY_DISABLED=true
+ENV STRAPI_DISABLE_UPDATE_NOTIFICATION=true
 RUN pnpm run build
 
-# Creating final production image
-FROM node:22-alpine
-RUN apk add --no-cache vips-dev
-# 👉 pnpm dans le runtime pour lancer "pnpm run start"
-RUN corepack enable && corepack prepare pnpm@10.15.1 --activate
+# PRUNE prod
+RUN pnpm prune --prod --ignore-scripts
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
-WORKDIR /opt/
-COPY --from=build /opt/node_modules ./node_modules
+
+############################
+# runtime: image finale minimale
+############################
+FROM node:22-alpine AS runtime
+
+# sharp (Strapi upload) nécessite la lib runtime
+RUN apk add --no-cache vips curl
+
+ENV NODE_ENV=production
+ENV HOST=0.0.0.0
+ENV PORT=1337
+ENV STRAPI_TELEMETRY_DISABLED=true
+ENV STRAPI_DISABLE_UPDATE_NOTIFICATION=true
 
 WORKDIR /opt/app
-COPY --from=build /opt/app ./
-ENV PATH=/opt/node_modules/.bin:$PATH
 
-RUN chown -R node:node /opt/app
+# On copie directement depuis "build" : node_modules PRUNÉ + code buildé
+COPY --from=build --chown=node:node /opt/app/node_modules ./node_modules
+COPY --from=build --chown=node:node /opt/app ./
+
 USER node
 EXPOSE 1337
-# 👉 npm -> pnpm
-#CMD ["pnpm", "run", "start"]
+
+# Démarrage Strapi (choisis l'un des deux)
+# CMD ["pnpm", "start"]
 CMD ["node", "server.js"]

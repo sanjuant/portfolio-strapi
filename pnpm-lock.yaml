@@ -6683,8 +6683,6 @@ snapshots:
       '@ckeditor/ckeditor5-core': 46.0.2
       '@ckeditor/ckeditor5-upload': 46.0.2
       ckeditor5: 46.0.2
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-alignment@46.0.2':
     dependencies:
@@ -6858,8 +6856,6 @@ snapshots:
       '@ckeditor/ckeditor5-utils': 46.0.2
       ckeditor5: 46.0.2
       es-toolkit: 1.39.5
-    transitivePeerDependencies:
-      - supports-color
 
   '@ckeditor/ckeditor5-editor-inline@46.0.2':
     dependencies:
