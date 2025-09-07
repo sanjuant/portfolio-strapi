@@ -29,7 +29,6 @@ node_modules
 # Côté Strapi / données locales (si non utilisés par le build Nuxt)
 .strapi
 .strapi-updater.json
-database
 
 # Caches / divers
 .cache
