@@ -38,4 +38,5 @@ RUN chown -R node:node /opt/app
 USER node
 EXPOSE 1337
 # 👉 npm -> pnpm
-CMD ["pnpm", "run", "start"]
+#CMD ["pnpm", "run", "start"]
+CMD ["node", "server.js"]

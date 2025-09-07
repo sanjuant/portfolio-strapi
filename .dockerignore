@@ -1,24 +1,42 @@
 # 💥 Évite d'envoyer 500–700 Mo au daemon
+*.log
+.build
+build
+coverage
+dist
 .git
 .gitignore
-.pnpm-store
 .npm
-.cache
-.tmp
-build
-dist
-coverage
-*.log
+.pnpm-store
 
 # Strapi / assets à volume
 public/uploads
 
 # CI / docker
-Dockerfile
-docker-compose.yml
-compose*.yml
 .dockerignore
+.github
+Dockerfile
+compose*.yml
+docker-compose.yml
 
 # Env
 .env
 .env.*
+
+# Dépendances
+node_modules
+
+# Côté Strapi / données locales (si non utilisés par le build Nuxt)
+.strapi
+.strapi-updater.json
+database
+
+# Caches / divers
+.cache
+.claude
+.idea
+.tmp
+
+# Docs / meta
+.editorconfig
+README.md
