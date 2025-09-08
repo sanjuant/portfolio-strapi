@@ -43,7 +43,12 @@ RUN --mount=type=cache,id=pnpm-store,target=/pnpm/store \
   pnpm fetch && pnpm install --frozen-lockfile --offline
 
 # puis seulement le code (pour le cache)
+RUN echo "=== Listing files before COPY ===" && ls -la
 COPY . .
+RUN echo "=== Listing files after COPY ===" && ls -la && \
+    echo "=== Checking database directory ===" && \
+    ls -la database/ || echo "database directory not found" && \
+    ls -la database/migrations/ || echo "migrations directory not found"
 
 ARG NODE_ENV=production
 ENV NODE_ENV=$NODE_ENV
