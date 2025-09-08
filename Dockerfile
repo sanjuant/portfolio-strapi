@@ -75,6 +75,10 @@ WORKDIR /opt/app
 COPY --from=build --chown=node:node /opt/app/node_modules ./node_modules
 COPY --from=build --chown=node:node /opt/app ./
 
+# S'assurer que les répertoires critiques ont les bonnes permissions
+RUN chown -R node:node /opt/app && \
+    chmod -R 755 /opt/app
+
 USER node
 EXPOSE 1337
 
